@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Auth | Entry Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-deep: #0f172a;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-deep);
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Custom Cyberpunk Animations */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100%; }
+        }
+
+        .cyber-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(56, 189, 248, 0.05) 100%);
+            z-index: -1;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 10px;
+            background: var(--accent-glow);
+            position: absolute;
+            animation: scanline 8s linear infinite;
+            filter: blur(20px);
+            opacity: 0.3;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.05);
+        }
+
+        .input-cyber {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-cyber:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+            outline: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-deep);
+            font-weight: 700;
+            transition: all 0.2s ease;
+            clip-path: polygon(0 0, 90% 0, 100% 30%, 100% 100%, 10% 100%, 0 70%);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 25px var(--accent);
+            filter: brightness(1.1);
+        }
+
+        .role-card {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .role-card.selected {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .step-transition {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .hidden-step {
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="cyber-bg"></div>
+    <div class="scanline"></div>
+
+    <main class="w-full max-w-md z-10">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold tracking-tighter italic">NEXUS<span class="text-[#38bdf8]">_OS</span></h1>
+            <p class="text-slate-400 text-sm mt-2 tracking-widest uppercase">Identity Verification Required</p>
+        </div>
+
+        <div class="glass-panel p-8 rounded-lg relative overflow-hidden">
+            
+            <section id="step-login" class="step-transition">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i class="ph-duotone ph-key text-[#38bdf8]"></i> Login
+                </h2>
+                
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase text-slate-400 mb-1 ml-1">Terminal ID (Email)</label>
+                        <input type="email" id="loginEmail" required class="input-cyber w-full p-3 rounded text-white" placeholder="user@nexus.io">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-slate-400 mb-1 ml-1">Access Code</label>
+                        <input type="password" id="loginPass" required class="input-cyber w-full p-3 rounded text-white" placeholder="••••••••">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary w-full py-3 mt-4 flex items-center justify-center gap-2">
+                        <span>INITIATE SESSION</span>
+                    </button>
+                </form>
+
+                <div class="mt-6 flex flex-col gap-3">
+                    <button onclick="toggleView('step-signup')" class="text-xs text-slate-400 hover:text-[#38bdf8] transition-colors">
+                        CREATE NEW OPERATOR ACCOUNT?
+                    </button>
+                    <button class="text-xs text-slate-500 hover:underline">FORGOT ACCESS CODE?</button>
+                </div>
+
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-slate-700"></span></div>
+                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-[#1e293b] px-2 text-slate-500">External Sync</span></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button class="bg-slate-800 hover:bg-slate-700 p-2 rounded flex items-center justify-center gap-2 text-sm border border-slate-700 transition-all">
+                        <i class="ph-bold ph-google-logo text-red-400"></i> Google
+                    </button>
+                    <button class="bg-slate-800 hover:bg-slate-700 p-2 rounded flex items-center justify-center gap-2 text-sm border border-slate-700 transition-all">
+                        <i class="ph-bold ph-github-logo"></i> GitHub
+                    </button>
+                </div>
+            </section>
+
+            <section id="step-signup" class="step-transition hidden-step">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <i class="ph-duotone ph-user-plus text-[#38bdf8]"></i> Register
+                </h2>
+                <form id="signupForm" class="space-y-4">
+                    <input type="email" id="regEmail" required class="input-cyber w-full p-3 rounded text-white" placeholder="Email Address">
+                    <input type="password" id="regPass" required class="input-cyber w-full p-3 rounded text-white" placeholder="Access Code">
+                    <button type="submit" class="btn-primary w-full py-3 mt-4">CONTINUE TO PROFILE</button>
+                </form>
+                <button onclick="toggleView('step-login')" class="w-full text-center mt-6 text-xs text-slate-400 hover:text-[#38bdf8]">
+                    BACK TO LOGIN
+                </button>
+            </section>
+
+            <section id="step-onboarding" class="step-transition hidden-step">
+                <h2 class="text-2xl font-bold mb-2">Assign Role</h2>
+                <p class="text-slate-400 text-sm mb-6">Select your operational classification.</p>
+                
+                <div class="space-y-3" id="roleSelector">
+                    <div onclick="selectRole(this, 'beginner')" class="role-card border border-slate-700 p-4 rounded-lg cursor-pointer flex items-center gap-4">
+                        <div class="p-3 bg-slate-800 rounded"><i class="ph-fill ph-leaf text-green-400"></i></div>
+                        <div>
+                            <p class="font-bold">Beginner</p>
+                            <p class="text-xs text-slate-500">New to the ecosystem.</p>
+                        </div>
+                    </div>
+                    <div onclick="selectRole(this, 'athlete')" class="role-card border border-slate-700 p-4 rounded-lg cursor-pointer flex items-center gap-4">
+                        <div class="p-3 bg-slate-800 rounded"><i class="ph-fill ph-lightning text-yellow-400"></i></div>
+                        <div>
+                            <p class="font-bold">Athlete</p>
+                            <p class="text-xs text-slate-500">Performance tracking enabled.</p>
+                        </div>
+                    </div>
+                    <div onclick="selectRole(this, 'coach')" class="role-card border border-slate-700 p-4 rounded-lg cursor-pointer flex items-center gap-4">
+                        <div class="p-3 bg-slate-800 rounded"><i class="ph-fill ph-shield-star text-purple-400"></i></div>
+                        <div>
+                            <p class="font-bold">Coach</p>
+                            <p class="text-xs text-slate-500">Fleet management access.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="completeOnboarding()" class="btn-primary w-full py-3 mt-8">FINALIZE PROTOCOL</button>
+            </section>
+
+            <div id="toast" class="absolute bottom-4 left-4 right-4 p-3 rounded bg-red-500/20 border border-red-500 text-red-200 text-xs hidden flex items-center gap-2">
+                <i class="ph-bold ph-warning-circle"></i>
+                <span id="toastMsg">Error message here</span>
+            </div>
+
+        </div>
+
+        <div class="mt-8 flex justify-between text-[10px] text-slate-600 font-mono">
+            <span>SYS_VER: 2.0.4</span>
+            <span>ENCRYPTION: AES-256</span>
+            <span>STATUS: ONLINE</span>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8000";
+        let selectedRole = null;
+        let tempUserData = {};
+
+        // --- UI NAVIGATION ---
+        function toggleView(stepId) {
+            const sections = ['step-login', 'step-signup', 'step-onboarding'];
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === stepId) {
+                    el.classList.remove('hidden-step');
+                    setTimeout(() => el.style.display = 'block', 50);
+                } else {
+                    el.classList.add('hidden-step');
+                    setTimeout(() => el.style.display = 'none', 400);
+                }
+            });
+        }
+
+        function selectRole(element, role) {
+            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedRole = role;
+        }
+
+        function showToast(msg, type = 'error') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = msg;
+            toast.className = `absolute bottom-4 left-4 right-4 p-3 rounded text-xs flex items-center gap-2 ${type === 'error' ? 'bg-red-500/20 border-red-500 text-red-200' : 'bg-emerald-500/20 border-emerald-500 text-emerald-200'}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+        }
+
+        function toggleLoading(btn, isLoading) {
+            if (isLoading) {
+                btn.disabled = true;
+                btn.dataset.original = btn.innerHTML;
+                btn.innerHTML = `<div class="spinner"></div>`;
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.original;
+            }
+        }
+
+        // --- API HANDLERS ---
+
+        // Login Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+
+            toggleLoading(btn, true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('nexus_token', data.token);
+                    showToast("Access Granted. Redirecting...", "success");
+                    setTimeout(() => window.location.href = '/dashboard', 1500);
+                } else {
+                    throw new Error(data.message || "Invalid Credentials");
+                }
+            } catch (err) {
+                showToast(err.message);
+            } finally {
+                toggleLoading(btn, false);
+            }
+        });
+
+        // Signup Handler
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            tempUserData.email = document.getElementById('regEmail').value;
+            tempUserData.password = document.getElementById('regPass').value;
+
+            // Transition to Onboarding
+            toggleView('step-onboarding');
+        });
+
+        // Final Onboarding Handler
+        async function completeOnboarding() {
+            if (!selectedRole) {
+                showToast("Please select an operational role.");
+                return;
+            }
+
+            const btn = document.querySelector('#step-onboarding button');
+            toggleLoading(btn, true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...tempUserData,
+                        role: selectedRole
+                    })
+                });
+
+                if (response.ok) {
+                    showToast("Account Initialized!", "success");
+                    setTimeout(() => toggleView('step-login'), 1500);
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message || "Registration Failed");
+                }
+            } catch (err) {
+                showToast(err.message);
+            } finally {
+                toggleLoading(btn, false);
+            }
+        }
+    </script>
+</body>
+</html>
