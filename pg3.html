@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding | CyberFit Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --bg-dark: #0f172a;
+            --accent-blue: #38bdf8;
+            --neon-glow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .heading-font { font-family: 'Orbitron', sans-serif; }
+
+        /* Custom Cyberpunk Borders */
+        .cyber-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--accent-blue);
+            box-shadow: var(--neon-glow);
+            clip-path: polygon(0 0, 100% 0, 100% 95%, 95% 100%, 0 100%);
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            0% { transform: translateX(50px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.3); }
+        }
+
+        .step-enter { animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .hidden-step { display: none; }
+
+        .form-input {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+            outline: none;
+        }
+
+        .goal-card.active {
+            border-color: var(--accent-blue);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid rgba(56, 189, 248, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid var(--accent-blue);
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-2xl mb-8">
+        <div class="flex justify-between mb-2 text-xs uppercase tracking-widest heading-font text-sky-400">
+            <span>System Initialization</span>
+            <span id="progress-text">Step 1 of 4</span>
+        </div>
+        <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-sky-500 transition-all duration-500 shadow-[0_0_10px_#38bdf8]" style="width: 25%;"></div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-2xl cyber-card p-8 md:p-12 relative overflow-hidden">
+        
+        <div id="step-1" class="step-content step-enter">
+            <h2 class="text-3xl heading-font mb-2 text-white">SELECT OBJECTIVE</h2>
+            <p class="text-slate-400 mb-8">Choose your primary neural-link fitness protocol.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div onclick="selectGoal('weight-loss')" class="goal-card group p-6 border border-slate-700 cursor-pointer hover:border-sky-500 transition-all rounded-lg" id="goal-weight-loss">
+                    <i class="fas fa-fire text-2xl mb-4 group-hover:text-sky-400"></i>
+                    <h3 class="font-bold mb-1">Fat Burn</h3>
+                    <p class="text-sm text-slate-500">Accelerated lipid oxidation.</p>
+                </div>
+                <div onclick="selectGoal('muscle-gain')" class="goal-card group p-6 border border-slate-700 cursor-pointer hover:border-sky-500 transition-all rounded-lg" id="goal-muscle-gain">
+                    <i class="fas fa-dumbbell text-2xl mb-4 group-hover:text-sky-400"></i>
+                    <h3 class="font-bold mb-1">Hypertrophy</h3>
+                    <p class="text-sm text-slate-500">Maximum fiber reconstruction.</p>
+                </div>
+            </div>
+
+            <div class="mt-10 flex justify-end">
+                <button onclick="nextStep(2)" class="bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold py-3 px-8 transition-transform hover:scale-105 active:scale-95 heading-font">
+                    NEXT_STAGE >>
+                </button>
+            </div>
+        </div>
+
+        <div id="step-2" class="step-content hidden-step">
+            <h2 class="text-3xl heading-font mb-2 text-white">BIOMETRIC DATA</h2>
+            <p class="text-slate-400 mb-8">Input physical parameters for calibration.</p>
+            
+            <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs uppercase text-sky-400 mb-2">Age</label>
+                        <input type="number" id="input-age" placeholder="25" class="w-full p-3 form-input rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-sky-400 mb-2">Sex</label>
+                        <select id="input-sex" class="w-full p-3 form-input rounded text-white appearance-none">
+                            <option value="male">MALE</option>
+                            <option value="female">FEMALE</option>
+                            <option value="other">OTHER</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs uppercase text-sky-400 mb-2">Height (cm)</label>
+                        <input type="number" id="input-height" placeholder="180" class="w-full p-3 form-input rounded text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-sky-400 mb-2">Weight (kg)</label>
+                        <input type="number" id="input-weight" placeholder="75" class="w-full p-3 form-input rounded text-white">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 flex justify-between">
+                <button onclick="prevStep(1)" class="text-slate-400 hover:text-white transition-colors heading-font"> << BACK </button>
+                <button onclick="nextStep(3)" class="bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold py-3 px-8 heading-font">NEXT_STAGE >></button>
+            </div>
+        </div>
+
+        <div id="step-3" class="step-content hidden-step">
+            <h2 class="text-3xl heading-font mb-2 text-white">ACTIVITY LEVEL</h2>
+            <p class="text-slate-400 mb-8">Specify your daily kinetic energy output.</p>
+            
+            <div class="space-y-3">
+                <label class="flex items-center p-4 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-all">
+                    <input type="radio" name="activity" value="1.2" class="accent-sky-500 w-5 h-5">
+                    <span class="ml-4"><strong>Sedentary</strong> (Office job, minimal movement)</span>
+                </label>
+                <label class="flex items-center p-4 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-all">
+                    <input type="radio" name="activity" value="1.55" class="accent-sky-500 w-5 h-5" checked>
+                    <span class="ml-4"><strong>Active</strong> (Training 3-5 days/week)</span>
+                </label>
+                <label class="flex items-center p-4 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-all">
+                    <input type="radio" name="activity" value="1.9" class="accent-sky-500 w-5 h-5">
+                    <span class="ml-4"><strong>Elite</strong> (Daily heavy exertion)</span>
+                </label>
+            </div>
+
+            <div class="mt-10 flex justify-between">
+                <button onclick="prevStep(2)" class="text-slate-400 hover:text-white transition-colors heading-font"> << BACK </button>
+                <button onclick="nextStep(4)" class="bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold py-3 px-8 heading-font">NEXT_STAGE >></button>
+            </div>
+        </div>
+
+        <div id="step-4" class="step-content hidden-step">
+            <h2 class="text-3xl heading-font mb-2 text-white">LINK HARDWARE</h2>
+            <p class="text-slate-400 mb-8">Sync your wearables for real-time telemetry.</p>
+            
+            <div id="device-status" class="flex items-center justify-between p-6 bg-slate-900 border border-dashed border-slate-600 rounded-lg mb-8">
+                <div class="flex items-center">
+                    <i class="fab fa-bluetooth-b text-sky-400 text-3xl mr-4"></i>
+                    <div>
+                        <p class="text-white font-bold">Scanning for devices...</p>
+                        <p class="text-xs text-slate-500">Ensure Bluetooth is active</p>
+                    </div>
+                </div>
+                <button onclick="connectDevice()" id="connect-btn" class="text-xs border border-sky-500 text-sky-500 px-4 py-2 hover:bg-sky-500 hover:text-slate-900 transition-all uppercase font-bold">Connect</button>
+            </div>
+
+            <div id="error-message" class="hidden mb-4 p-3 bg-red-900/30 border border-red-500 text-red-400 text-sm rounded">
+                <i class="fas fa-exclamation-triangle mr-2"></i> <span id="error-text">Network failure detected.</span>
+            </div>
+
+            <div class="mt-10 flex justify-between">
+                <button onclick="prevStep(3)" class="text-slate-400 hover:text-white transition-colors heading-font"> << BACK </button>
+                <button id="final-submit" onclick="handleOnboardingSubmit()" class="bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold py-3 px-8 flex items-center gap-3 heading-font">
+                    <span>COMPLETE_SYNC</span>
+                    <div id="submit-loader" class="loader hidden"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8000";
+        let currentStep = 1;
+        let userData = {
+            goal: '',
+            age: null,
+            sex: 'male',
+            height: null,
+            weight: null,
+            activityLevel: 1.55,
+            deviceConnected: false
+        };
+
+        // UI Logic
+        function selectGoal(goal) {
+            userData.goal = goal;
+            document.querySelectorAll('.goal-card').forEach(el => el.classList.remove('active', 'ring-2', 'ring-sky-500'));
+            document.getElementById(`goal-${goal}`).classList.add('active', 'ring-2', 'ring-sky-500');
+        }
+
+        function nextStep(step) {
+            // Validation Logic
+            if (step === 2 && !userData.goal) {
+                alert("Please select an objective protocol.");
+                return;
+            }
+
+            document.getElementById(`step-${currentStep}`).classList.add('hidden-step');
+            document.getElementById(`step-${currentStep}`).classList.remove('step-enter');
+            
+            currentStep = step;
+            
+            const nextEl = document.getElementById(`step-${currentStep}`);
+            nextEl.classList.remove('hidden-step');
+            nextEl.classList.add('step-enter');
+
+            updateProgress();
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step-${currentStep}`).classList.add('hidden-step');
+            currentStep = step;
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden-step');
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progress = (currentStep / 4) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-text').innerText = `Step ${currentStep} of 4`;
+        }
+
+        async function connectDevice() {
+            const btn = document.getElementById('connect-btn');
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Pairing...';
+            
+            // Artificial delay to simulate hardware handshake
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            userData.deviceConnected = true;
+            document.getElementById('device-status').innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-400 text-3xl mr-4"></i>
+                    <div>
+                        <p class="text-white font-bold">Neural Link Established</p>
+                        <p class="text-xs text-green-500">Device: IONIC-WEARABLE-X1</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Logic & Backend Integration
+        async function handleOnboardingSubmit() {
+            const submitBtn = document.getElementById('final-submit');
+            const loader = document.getElementById('submit-loader');
+            const errorBox = document.getElementById('error-message');
+            
+            // Gather final inputs
+            userData.age = document.getElementById('input-age').value;
+            userData.height = document.getElementById('input-height').value;
+            userData.weight = document.getElementById('input-weight').value;
+            userData.sex = document.getElementById('input-sex').value;
+            userData.activityLevel = document.querySelector('input[name="activity"]:checked').value;
+
+            // UI State: Loading
+            submitBtn.disabled = true;
+            loader.classList.remove('hidden');
+            errorBox.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/onboarding`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+
+                if (!response.ok) throw new Error('System sync failed. Protocol rejected.');
+
+                const result = await response.json();
+                
+                // Success State
+                submitBtn.innerHTML = "SYNC COMPLETE";
+                submitBtn.classList.replace('bg-sky-500', 'bg-green-500');
+                
+                setTimeout(() => {
+                    window.location.href = "/dashboard.html";
+                }, 1500);
+
+            } catch (err) {
+                // UI State: Error
+                console.error(err);
+                errorBox.classList.remove('hidden');
+                document.getElementById('error-text').innerText = err.message;
+                submitBtn.disabled = false;
+                loader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
